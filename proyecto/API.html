@@ -1,10 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Películas API</title>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Películas API</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+  <link href="https://fonts.cdnfonts.com/css/break-love" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/jomolhari-2" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar navbar-default" style="background: linear-gradient(to right, #ffffff, #f3f3f3); margin-bottom: 0; border-bottom: 1px solid #ccc;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/nueva carpeta/index.html" style="color: #0b1e8a; font-weight: bold;">Inicio</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: #000; font-weight: normal;">
+            Unidad 1
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="#">practica uno</a></li>
+            <li><a href="#">practica dos</a></li>
+            <li><a href="#">practica tres</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: #000; font-weight: normal;">
+            Unidad 2
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="#">practica cuatro</a></li>
+            <li><a href="#">practica cinco</a></li>
+            <li><a href="pokedex.html">practica seis</a></li>
+          </ul>
+        </li>
+        <li class="dropdown active">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: #000; background-color: #e0e0e0; font-weight: normal;">
+            Unidad 3
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="dragonball.html">practica siete</a></li>
+            <li><a href="API.html">practica ocho</a></li>
+            <li><a href="prueba2.html">practica nueve</a></li>
+            <li><a href="#">practica diez</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <header>
+    <input type="text" id="search" class="search" placeholder="Busca una película...">
+  </header>
+
+  <main id="main"></main>
+
+  <style>
     :root {
         --background-gradient: linear-gradient(135deg, #193c75, #c2e9fb);
         --glass-color: rgba(255, 255, 255, 0.2);
@@ -129,80 +187,69 @@
     .red {
         color: var(--red);
     }
-</style>
-    </style>
-</head>
-<body>
+  </style>
 
-    <header>
-        <input type="text" id="search" class="search" placeholder="Busca una película...">
-    </header>
+  <script>
+    const API_URL = 'https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=3fd2be6f0c70a2a598f084ddfb75487c&page=1';
+    const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
+    const SEARCH_API = 'https://api.themoviedb.org/3/search/movie?api_key=3fd2be6f0c70a2a598f084ddfb75487c&query=';
 
-    <main id="main"></main>
+    const main = document.getElementById('main');
+    const search = document.getElementById('search');
 
-    <script>
-        const API_URL = 'https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=3fd2be6f0c70a2a598f084ddfb75487c&page=1';
-        const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
-        const SEARCH_API = 'https://api.themoviedb.org/3/search/movie?api_key=3fd2be6f0c70a2a598f084ddfb75487c&query=';
+    getMovies(API_URL);
 
-        const main = document.getElementById('main');
-        const search = document.getElementById('search');
+    async function getMovies(url) {
+      const res = await fetch(url);
+      const data = await res.json();
+      showMovies(data.results);
+    }
 
-        // Mostrar películas populares al cargar
+    function showMovies(movies) {
+      main.innerHTML = '';
+
+      movies.forEach((movie) => {
+        const { title, poster_path, vote_average, overview } = movie;
+
+        const movieEl = document.createElement('div');
+        movieEl.classList.add('movie');
+
+        movieEl.innerHTML = `
+          <img src="${IMG_PATH + poster_path}" alt="${title}">
+          <div class="movie-info">
+            <h3>${title}</h3>
+            <span class="${getClassByRate(vote_average)}">${vote_average}</span>
+          </div>
+          <div class="overview">
+            <h3>Resumen</h3>
+            ${overview}
+          </div>
+        `;
+
+        main.appendChild(movieEl);
+      });
+    }
+
+    function getClassByRate(vote) {
+      if (vote >= 8) {
+        return 'green';
+      } else if (vote >= 5) {
+        return 'orange';
+      } else {
+        return 'red';
+      }
+    }
+
+    search.addEventListener('input', (e) => {
+      const searchTerm = e.target.value;
+
+      if (searchTerm && searchTerm.trim() !== '') {
+        getMovies(SEARCH_API + encodeURIComponent(searchTerm));
+      } else {
         getMovies(API_URL);
-
-        async function getMovies(url) {
-            const res = await fetch(url);
-            const data = await res.json();
-            showMovies(data.results);
-        }
-
-        function showMovies(movies) {
-            main.innerHTML = '';
-
-            movies.forEach((movie) => {
-                const { title, poster_path, vote_average, overview } = movie;
-
-                const movieEl = document.createElement('div');
-                movieEl.classList.add('movie');
-
-                movieEl.innerHTML = `
-                    <img src="${IMG_PATH + poster_path}" alt="${title}">
-                    <div class="movie-info">
-                        <h3>${title}</h3>
-                        <span class="${getClassByRate(vote_average)}">${vote_average}</span>
-                    </div>
-                    <div class="overview">
-                        <h3>Resumen</h3>
-                        ${overview}
-                    </div>
-                `;
-
-                main.appendChild(movieEl);
-            });
-        }
-
-        function getClassByRate(vote) {
-            if (vote >= 8) {
-                return 'green';
-            } else if (vote >= 5) {
-                return 'orange';
-            } else {
-                return 'red';
-            }
-        }
-
-        // Buscar películas
-        search.addEventListener('input', (e) => {
-            const searchTerm = e.target.value;
-
-            if (searchTerm && searchTerm.trim() !== '') {
-                getMovies(SEARCH_API + encodeURIComponent(searchTerm));
-            } else {
-                getMovies(API_URL);
-            }
-        });
-    </script>
+      }
+    });
+  </script>
 
 </body>
 </html>
